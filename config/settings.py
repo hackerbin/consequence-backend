@@ -11,7 +11,14 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 
 from pathlib import Path
+import environ
 
+env = environ.Env(
+    # set casting, default value
+    DEBUG=(bool, False)
+)
+# reading .env file
+environ.Env.read_env()
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -37,6 +44,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'core',
 ]
 
 MIDDLEWARE = [
@@ -123,3 +131,13 @@ STATIC_URL = '/static/'
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# TRUE_LAYER_CONFIG
+TRUELAYER_API_BASE = env('TRUELAYER_API_BASE')
+TRUELAYER_AUTH_BASE = env('TRUELAYER_AUTH_BASE')
+TRUELAYER_RESPONSE_TYPE = 'code'
+TRUELAYER_CLIENT_ID = env('TRUELAYER_CLIENT_ID')
+TRUELAYER_CLIENT_SECRET = env('TRUELAYER_CLIENT_SECRET')
+TRUELAYER_SCOPE = 'info accounts balance cards transactions direct_debits standing_orders offline_access'
+TRUELAYER_REDIRECT_URI = env('TRUELAYER_REDIRECT_URI')
+TRUELAYER_PROVIDERS = 'uk-ob-all uk-oauth-all uk-cs-mock'
