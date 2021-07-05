@@ -1,3 +1,89 @@
+from django.contrib.postgres.fields import JSONField
 from django.db import models
 
+from config.constants import ACCOUNT_TYPE_CHOICE
+from users.models import User
 
+
+class Bank(models.Model):
+    """
+    'update_timestamp': '2021-07-05T18:09:01.0581797Z',
+     'account_id': '56c7b029e0f8ec5a2334fb0ffc2fface',
+     'account_type': 'TRANSACTION',
+     'display_name': 'TRANSACTION ACCOUNT 1',
+     'currency': 'GBP',
+     'account_number': {'swift_bic': 'CPBKGB00',
+                            'number': '10000000',
+                        'sort_code': '01-21-31'},
+     'provider': {'display_name': 'MOCK',
+                      'provider_id': 'mock',
+              'logo_uri': 'https://truelayer-client-logos.s3-eu-west-1.amazonaws.com/banks/banks-icons/mock-icon.svg'}}
+    """
+    user = models.ForeignKey(User, on_delete=models.DO_NOTHING, related_name='banks')
+    account_id = models.CharField(max_length=64, unique=True)
+    account_type = models.CharField(max_length=64)
+    display_name = models.CharField(max_length=255)
+    currency = models.CharField(max_length=10)
+    account_number = JSONField()
+    provider = JSONField()
+    update_timestamp = models.DateTimeField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+
+class Card(models.Model):
+    """
+    {'account_id': '2cbf9b6063102763ccbe3ea62f1b3e72',
+                      'card_network': 'MASTERCARD',
+                      'card_type': 'CREDIT',
+                      'currency': 'GBP',
+                      'display_name': 'CREDIT CARD 1',
+                      'partial_card_number': '1000',
+                      'name_on_card': 'John Doe ',
+                      'update_timestamp': '2021-07-05T18:09:18.1906563Z',
+                      'provider': {'display_name': 'MOCK',
+                                   'provider_id': 'mock',
+                                   'logo_uri': 'https://truelayer-client-logos.s3-eu-west-1.amazonaws.com/banks/banks-icons/mock-icon.svg'}}
+    """
+    user = models.ForeignKey(User, on_delete=models.DO_NOTHING, related_name='cards')
+    account_id = models.CharField(max_length=64, unique=True)
+    card_network = models.CharField(max_length=64, unique=True)
+    card_type = models.CharField(max_length=64, unique=True)
+    currency = models.CharField(max_length=10, unique=True)
+    display_name = models.CharField(max_length=255)
+    partial_card_number = models.CharField(max_length=64)
+    name_on_card = models.CharField(max_length=255)
+    provider = JSONField()
+    update_timestamp = models.DateTimeField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+
+class Transactions():
+    """
+    'timestamp': '2021-07-05T00:00:00Z',
+      'description': 'LNK ATM WITHDRAWAL',
+      'transaction_type': 'DEBIT',
+      'transaction_category': 'ATM',
+      'transaction_classification': [],
+      'amount': -60.0,
+      'currency': 'GBP',
+      'transaction_id': '2235c2ba8d700ce39e0c69cef3c7fe61',
+      'running_balance': {'currency': 'GBP', 'amount': 594.87},
+      'meta': {'provider_transaction_category': 'CPT'}},
+    """
+    user = models.ForeignKey(User, on_delete=models.DO_NOTHING, related_name='transactions')
+    account_type = models.CharField(max_length=10, choices=ACCOUNT_TYPE_CHOICE)
+    account_id = models.CharField(max_length=64)  # card transaction id
+
+    timestamp = models.DateTimeField()
+    description = models.CharField(max_length=255)
+    transaction_type = models.CharField(max_length=64)
+    transaction_category = models.CharField(max_length=64)
+    transaction_classification = models.CharField(max_length=64)  # need to update
+    merchant_name = models.CharField(max_length=64)  # need to update
+    amount = models.FloatField()
+    currency = models.CharField(max_length=10)
+    transaction_id = models.CharField(max_length=64)
+    running_balance = JSONField()
+    meta = JSONField()

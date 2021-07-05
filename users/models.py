@@ -37,7 +37,7 @@ class User(AbstractUser):
 
 
 class TruelayerToken(models.Model):
-    user = models.OneToOneField(User, on_delete=models.PROTECT, related_name='truelayer_token')
+    user = models.OneToOneField(User, on_delete=models.DO_NOTHING, related_name='truelayer_token')
     access_token = models.TextField()
     refresh_token = models.CharField(max_length=255)
     token_type = models.CharField(max_length=20)
