@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'core',
     'users',
+    'truelayer',
 ]
 
 REST_FRAMEWORK = {

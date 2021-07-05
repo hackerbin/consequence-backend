@@ -1,10 +1,11 @@
 from rest_framework.authtoken.models import Token
 from rest_framework.exceptions import AuthenticationFailed
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework.response import Response
 
 from .models import User
-from .serializers import RegisterSerializer
+from .serializers import RegisterSerializer, UserSerializer
 
 
 class RegisterAPIView(APIView):
@@ -33,3 +34,21 @@ class LoginAPIView(APIView):
         response.set_cookie(key='Authorization', value='Token {}'.format(token), httponly=True)
         response.data = {'token': token.key}
         return response
+
+
+class LogoutAPIView(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request):
+        request.user.auth_token.delete()
+        response = Response()
+        response.delete_cookie(key='Authorization')
+        response.data = {'message': 'logout successful'}
+        return response
+
+
+class UserAPIView(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request):
+        return Response({'user': UserSerializer(request.user).data})

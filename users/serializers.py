@@ -19,3 +19,9 @@ class RegisterSerializer(serializers.ModelSerializer):
             instance.set_password(password)
         instance.save()
         return instance
+
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['id', 'business_name', 'business_nature', 'number_of_employee', 'email']
