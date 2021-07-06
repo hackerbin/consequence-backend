@@ -2,6 +2,7 @@ from django.contrib.postgres.fields import JSONField
 from django.db import models
 
 from config.constants import ACCOUNT_TYPE_CHOICE
+from core.utils import generate_random_float
 from users.models import User
 
 
@@ -29,6 +30,9 @@ class Bank(models.Model):
     update_timestamp = models.DateTimeField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.account_id
 
 
 class Card(models.Model):
@@ -58,8 +62,31 @@ class Card(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    def __str__(self):
+        return self.account_id
 
-class Transactions():
+
+class Classsification(models.Model):
+    title = models.CharField(max_length=255, unique=True)
+    co2e_factor = models.FloatField(default=generate_random_float())
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.title
+
+
+class Merchant(models.Model):
+    title = models.CharField(max_length=255, unique=True)
+    co2e_factor = models.FloatField(default=generate_random_float())
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.title
+
+
+class Transaction(models.Model):
     """
     'timestamp': '2021-07-05T00:00:00Z',
       'description': 'LNK ATM WITHDRAWAL',
@@ -80,10 +107,15 @@ class Transactions():
     description = models.CharField(max_length=255)
     transaction_type = models.CharField(max_length=64)
     transaction_category = models.CharField(max_length=64)
-    transaction_classification = models.CharField(max_length=64)  # need to update
-    merchant_name = models.CharField(max_length=64)  # need to update
+    transaction_classification = models.ManyToManyField(Classsification, related_name='transactions')
+    merchant_name = models.ManyToManyField(Merchant, related_name='transactions')
     amount = models.FloatField()
     currency = models.CharField(max_length=10)
     transaction_id = models.CharField(max_length=64)
     running_balance = JSONField()
     meta = JSONField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.account_id} - {self.account_type} - {self.transaction_id}"
