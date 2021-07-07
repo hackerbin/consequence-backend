@@ -34,6 +34,12 @@ class Bank(models.Model):
     def __str__(self):
         return self.account_id
 
+    @staticmethod
+    def create_from_object(obj, user):
+        obj['user'] = user
+        _created_obj = Bank.objects.create(**obj)
+        return _created_obj
+
 
 class Card(models.Model):
     """
