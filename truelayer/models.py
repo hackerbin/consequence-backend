@@ -57,9 +57,9 @@ class Card(models.Model):
     """
     user = models.ForeignKey(User, on_delete=models.DO_NOTHING, related_name='cards')
     account_id = models.CharField(max_length=64, unique=True)
-    card_network = models.CharField(max_length=64, unique=True)
-    card_type = models.CharField(max_length=64, unique=True)
-    currency = models.CharField(max_length=10, unique=True)
+    card_network = models.CharField(max_length=64)
+    card_type = models.CharField(max_length=64)
+    currency = models.CharField(max_length=10)
     display_name = models.CharField(max_length=255)
     partial_card_number = models.CharField(max_length=64)
     name_on_card = models.CharField(max_length=255)
@@ -72,7 +72,7 @@ class Card(models.Model):
         return self.account_id
 
 
-class Classsification(models.Model):
+class Classification(models.Model):
     title = models.CharField(max_length=255, unique=True)
     co2e_factor = models.FloatField(default=generate_random_float())
     created_at = models.DateTimeField(auto_now_add=True)
@@ -113,7 +113,7 @@ class Transaction(models.Model):
     description = models.CharField(max_length=255)
     transaction_type = models.CharField(max_length=64)
     transaction_category = models.CharField(max_length=64)
-    transaction_classification = models.ManyToManyField(Classsification, related_name='transactions')
+    transaction_classification = models.ManyToManyField(Classification, related_name='transactions')
     merchant_name = models.ManyToManyField(Merchant, related_name='transactions')
     amount = models.FloatField()
     currency = models.CharField(max_length=10)

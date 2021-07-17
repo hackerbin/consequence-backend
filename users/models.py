@@ -11,7 +11,7 @@ utc = pytz.UTC
 
 class User(AbstractUser):
     business_name = models.CharField(max_length=100, null=True, blank=True)
-    business_nature = models.CharField(max_length=100, null=True, blank=True)
+    nature_of_business = models.CharField(max_length=100, null=True, blank=True)
     number_of_employee = models.IntegerField(null=True)
     email = models.EmailField(unique=True, null=False)
 
@@ -31,9 +31,15 @@ class User(AbstractUser):
                 truelayer = TrueLayer()
                 token_object = truelayer.get_refresh_token(self.truelayer_token.refresh_token)
                 if token_object:
-                    self.truelayer_token.__dict__.update(**token_object)
+                    self.truelayer_token.access_token = token_object['access_token']
+                    self.truelayer_token.refresh_token = token_object['refresh_token']
+                    self.truelayer_token.save()
+                    # self.truelayer_token.__dict__.update(**token_object)
                     return token_object['access_token']
         return {}
+
+    def tl_is_valid(self):
+        return self.truelayer_token.is_valid()
 
 
 class TruelayerToken(models.Model):
@@ -56,4 +62,4 @@ class TruelayerToken(models.Model):
         return False
 
 
-
+class Business(models.Model):
