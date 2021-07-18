@@ -1,3 +1,4 @@
+from rest_framework import status
 from rest_framework.authtoken.models import Token
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.permissions import IsAuthenticated
@@ -52,3 +53,13 @@ class UserAPIView(APIView):
 
     def get(self, request):
         return Response({'user': UserSerializer(request.user).data})
+
+
+class UserBusinessUpdate(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request):
+        serializer = UserSerializer(request.user, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_200_OK)

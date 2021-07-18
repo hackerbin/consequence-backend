@@ -6,7 +6,7 @@ from users.models import User
 class RegisterSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'business_name', 'business_nature', 'number_of_employee', 'email', 'password']
+        fields = ['id', 'email', 'password']
         extra_kwargs = {
             'password': {'write_only': True},
             'id': {'read_only': True}
@@ -24,4 +24,5 @@ class RegisterSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'business_name', 'business_nature', 'number_of_employee', 'email']
+        depth = 1
+        fields = ['id', 'email', 'business']
