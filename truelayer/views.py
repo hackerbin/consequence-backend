@@ -105,11 +105,30 @@ class LinkAccount(APIView):
                 truelayer.set_access_token(request.user.get_truelayer_token())
                 card_account = truelayer.retrieve_card(account_id)
                 if "results" in card_account and card_account["results"]:
+                    # Link Card
                     card_obj = card_account["results"][0]
-                    card_obj['user'] = request.user.pk
-                    serializer = CardSerializer(data=card_obj)
+                    card_obj['user'] = request.user
+                    serializer = CardSerializer(data=card_obj, context={
+                        'request': request
+                    })
                     serializer.is_valid(raise_exception=True)
                     serializer.save()
+
+                    # Link Card Transaction
+                    transactions = truelayer.retrieve_card_transactions(account_id)
+                    if "results" in transactions and transactions["results"]:
+                        for transaction in transactions["results"]:
+                            # transaction['user'] = request.user.pk
+                            transaction['account_type'] = constants.BANK
+                            transaction['account_id'] = card_obj['account_id']
+                            if not "merchant_name" in transaction:
+                                transaction['merchant_name'] = ""
+                            transaction_serializer = TransactionSerializer(data=transaction, context={
+                                'request': request
+                            })
+                            transaction_serializer.is_valid(raise_exception=True)
+                            transaction_serializer.save()
+
                     return Response(serializer.data)
         raise ValidationError('Invalid account info')
 

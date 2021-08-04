@@ -61,18 +61,13 @@ class TruelayerToken(models.Model):
         return False
 
 
+class NatureOfBusiness(models.Model):
+    title = models.CharField(max_length=100, unique=True)
+    impact_per_member = models.FloatField(default=generate_random_float())
+
+
 class Business(models.Model):
-    business_name = models.CharField(max_length=100, null=True, blank=True)
-    nature_of_business = models.CharField(max_length=100, null=True, blank=True)
-    user = models.ManyToManyField(
-        User, related_name="business", through='UserBusiness')
-
-
-class UserBusiness(models.Model):
-    user = models.ForeignKey(User, on_delete=models.DO_NOTHING)
-    business = models.ForeignKey(Business, on_delete=models.DO_NOTHING)
+    user = models.OneToOneField(User, on_delete=models.DO_NOTHING, related_name='business')
+    business_name = models.CharField(max_length=100)
+    nature_of_business = models.ForeignKey(NatureOfBusiness, on_delete=models.DO_NOTHING, related_name='business')
     number_of_employees = models.IntegerField()
-    co2e_factor = models.FloatField(default=generate_random_float())
-
-    class Meta:
-        unique_together = (('user', 'business'),)

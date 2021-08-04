@@ -1,4 +1,4 @@
-from django.db.models import JSONField
+from django.db.models import JSONField, Q
 from django.db import models
 
 from config.constants import ACCOUNT_TYPE_CHOICE
@@ -73,10 +73,14 @@ class Card(models.Model):
 
 
 class Classification(models.Model):
-    title = models.CharField(max_length=255, unique=True)
+    category = models.CharField(max_length=255)
+    subcategory = models.CharField(max_length=255, null=True)
     co2e_factor = models.FloatField(default=generate_random_float())
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ('category', 'subcategory',)
 
     def __str__(self):
         return self.title
@@ -113,8 +117,8 @@ class Transaction(models.Model):
     description = models.CharField(max_length=255)
     transaction_type = models.CharField(max_length=64)
     transaction_category = models.CharField(max_length=64)
-    transaction_classification = models.ManyToManyField(Classification, related_name='transactions')
-    merchant_name = models.ManyToManyField(Merchant, related_name='transactions')
+    transaction_classification = models.ForeignKey(Classification, on_delete=models.DO_NOTHING, related_name='transactions', null=True)
+    merchant_name = models.ForeignKey(Merchant, on_delete=models.DO_NOTHING, related_name='transactions', null=True)
     amount = models.FloatField()
     currency = models.CharField(max_length=10)
     transaction_id = models.CharField(max_length=64)
@@ -125,3 +129,18 @@ class Transaction(models.Model):
 
     def __str__(self):
         return f"{self.account_id} - {self.account_type} - {self.transaction_id}"
+
+    def get_impact(self):
+        if self.merchant_name:
+            impact = self.amount * self.merchant_name.co2e_factor
+        elif self.transaction_classification:
+            impact = self.amount * self.transaction_classification.co2e_factor
+        else:
+            impact = self.amount
+
+        return impact
+
+
+    @staticmethod
+    def get_avarage_impact():
+        Transaction.objects.filter(Q(transaction_classification__isnull=False) | Q(merchant_name__isnull=False))
